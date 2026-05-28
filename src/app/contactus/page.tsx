@@ -1,14 +1,55 @@
+'use client'
+
+import { useState, type FormEvent } from 'react'
+
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { contactInfo } from '@/assets/data/contact-us'
+import { submitContactMessage } from '@/lib/admin-contacts'
 
 const ContactPage = () => {
+    const [name, setName] = useState('')
+    const [email, setEmail] = useState('')
+    const [phone, setPhone] = useState('')
+    const [role, setRole] = useState('')
+    const [message, setMessage] = useState('')
+    const [loading, setLoading] = useState(false)
+    const [statusMessage, setStatusMessage] = useState('')
+    const [isError, setIsError] = useState(false)
+
+    const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault()
+        setLoading(true)
+        setStatusMessage('')
+        setIsError(false)
+
+        try {
+            await submitContactMessage({
+                name: name.trim(),
+                email: email.trim(),
+                phone: phone.trim() || undefined,
+                role: role.trim() || undefined,
+                message: message.trim()
+            })
+            setStatusMessage('Message sent successfully! We will get back to you shortly.')
+            setName('')
+            setEmail('')
+            setPhone('')
+            setRole('')
+            setMessage('')
+        } catch (error) {
+            setIsError(true)
+            setStatusMessage(error instanceof Error ? error.message : 'Something went wrong. Please try again.')
+        } finally {
+            setLoading(false)
+        }
+    }
+
     return (
         <main className='bg-muted text-foreground'>
             <section id='contact-us' className='relative overflow-hidden py-16 sm:py-24 lg:py-32'>
-                {/* <div className='bg-primary/10 absolute inset-x-0 top-0 h-48 blur-3xl' /> */}
                 <div className='relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
                     <div className='mx-auto max-w-3xl space-y-4 text-center'>
                         <Badge variant='outline' className='text-muted-foreground text-sm tracking-[0.32em] uppercase'>
@@ -72,26 +113,60 @@ const ContactPage = () => {
                                     </p>
                                 </div>
 
-                                <form className='space-y-5'>
+                                <form onSubmit={handleSubmit} className='space-y-5'>
                                     <div className='grid gap-4 sm:grid-cols-2'>
                                         <label className='text-foreground flex flex-col gap-2 text-sm font-medium'>
                                             Full name
-                                            <Input id='name' name='name' type='text' placeholder='Your full name' className='rounded-xl' />
+                                            <Input
+                                                id='name'
+                                                name='name'
+                                                type='text'
+                                                placeholder='Your full name'
+                                                className='rounded-xl'
+                                                value={name}
+                                                onChange={e => setName(e.target.value)}
+                                                required
+                                            />
                                         </label>
                                         <label className='text-foreground flex flex-col gap-2 text-sm font-medium'>
                                             Email address
-                                            <Input id='email' name='email' type='email' placeholder='name@example.com' className='rounded-xl' />
+                                            <Input
+                                                id='email'
+                                                name='email'
+                                                type='email'
+                                                placeholder='name@example.com'
+                                                className='rounded-xl'
+                                                value={email}
+                                                onChange={e => setEmail(e.target.value)}
+                                                required
+                                            />
                                         </label>
                                     </div>
 
                                     <div className='grid gap-4 sm:grid-cols-2'>
                                         <label className='text-foreground flex flex-col gap-2 text-sm font-medium'>
                                             Phone number
-                                            <Input id='phone' name='phone' type='tel' placeholder='+977 98XXXXXXX' className='rounded-xl' />
+                                            <Input
+                                                id='phone'
+                                                name='phone'
+                                                type='tel'
+                                                placeholder='+977 98XXXXXXX'
+                                                className='rounded-xl'
+                                                value={phone}
+                                                onChange={e => setPhone(e.target.value)}
+                                            />
                                         </label>
                                         <label className='text-foreground  flex flex-col gap-2 text-sm font-medium'>
                                             Role
-                                            <Input id='role' name='role' type='text' placeholder='Player, coach, club, parent' className='rounded-xl' />
+                                            <Input
+                                                id='role'
+                                                name='role'
+                                                type='text'
+                                                placeholder='Player, coach, club, parent'
+                                                className='rounded-xl'
+                                                value={role}
+                                                onChange={e => setRole(e.target.value)}
+                                            />
                                         </label>
                                     </div>
 
@@ -103,8 +178,23 @@ const ContactPage = () => {
                                             rows={5}
                                             placeholder='Describe your request, concern, or topic in detail'
                                             className='border-input focus-visible:border-ring focus-visible:ring-ring/50 min-h-[140px] rounded-2xl border bg-transparent px-3 py-3 text-base shadow-xs transition-colors duration-200 outline-none'
+                                            value={message}
+                                            onChange={e => setMessage(e.target.value)}
+                                            required
                                         />
                                     </label>
+
+                                    {statusMessage ? (
+                                        <div
+                                            className={`rounded-2xl border p-4 text-sm font-medium ${
+                                                isError
+                                                    ? 'bg-destructive/10 border-destructive/20 text-destructive'
+                                                    : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-600 dark:text-emerald-400'
+                                            }`}
+                                        >
+                                            {statusMessage}
+                                        </div>
+                                    ) : null}
 
                                     <div className='text-muted-foreground space-y-3 text-sm'>
                                         <p className='text-foreground font-medium'>What happens next?</p>
@@ -114,8 +204,8 @@ const ContactPage = () => {
                                         </p>
                                     </div>
 
-                                    <Button type='submit' className='w-full rounded-2xl'>
-                                        Send Message
+                                    <Button type='submit' disabled={loading} className='w-full rounded-2xl'>
+                                        {loading ? 'Sending Message...' : 'Send Message'}
                                     </Button>
                                 </form>
                             </div>

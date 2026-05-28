@@ -8,6 +8,7 @@ import AdminEventList from '@/components/admin/admin-event-list'
 import AdminShell from '@/components/admin/admin-shell'
 import AdminNewsForm from '@/components/admin/admin-news-form'
 import AdminNewsList from '@/components/admin/admin-news-list'
+import AdminContactsList from '@/components/admin/admin-contacts-list'
 import { supabase } from '@/config/supabase'
 import {
     createAdminEvent,
@@ -27,6 +28,12 @@ import {
     updateAdminNews,
     uploadNewsImage
 } from '@/lib/admin-news'
+import {
+    fetchContactMessages,
+    updateContactMessageStatus,
+    deleteContactMessage,
+    type ContactMessage
+} from '@/lib/admin-contacts'
 
 type AdminUser = {
     id: string
@@ -41,11 +48,14 @@ const AdminPage = () => {
     const [loading, setLoading] = useState(false)
     const [events, setEvents] = useState<EventRecord[]>([])
     const [selectedEvent, setSelectedEvent] = useState<EventRecord | null>(null)
-    const [activeTab, setActiveTab] = useState<'events' | 'news'>('events')
+    const [activeTab, setActiveTab] = useState<'events' | 'news' | 'contacts'>('events')
 
     // news state
     const [news, setNews] = useState<NewsRecord[]>([])
     const [selectedNews, setSelectedNews] = useState<NewsRecord | null>(null)
+
+    // contacts state
+    const [contacts, setContacts] = useState<ContactMessage[]>([])
 
     useEffect(() => {
         const initializeUser = async () => {
@@ -102,8 +112,21 @@ const AdminPage = () => {
             }
         }
 
+        const loadContacts = async () => {
+            if (!user) return
+
+            try {
+                const items = await fetchContactMessages()
+
+                setContacts(items)
+            } catch {
+                // non-fatal
+            }
+        }
+
         void loadEvents()
         void loadNews()
+        void loadContacts()
     }, [user])
 
     const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
@@ -264,6 +287,45 @@ const AdminPage = () => {
         }
     }
 
+    const handleToggleContactStatus = async (id: string, currentStatus: 'complete' | 'uncomplete') => {
+        setLoading(true)
+        setMessage('')
+
+        try {
+            const nextStatus = currentStatus === 'complete' ? 'uncomplete' : 'complete'
+            await updateContactMessageStatus(id, nextStatus)
+            setContacts(current =>
+                current.map(c => (c.id === id ? { ...c, status: nextStatus } : c))
+            )
+            setMessage('Query status updated successfully.')
+        } catch (error) {
+            setMessage(error instanceof Error ? error.message : 'Unable to update status')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const handleDeleteContact = async (id: string) => {
+        const confirmed = window.confirm('Delete this query permanently?')
+
+        if (!confirmed) {
+            return
+        }
+
+        setLoading(true)
+        setMessage('')
+
+        try {
+            await deleteContactMessage(id)
+            setContacts(current => current.filter(c => c.id !== id))
+            setMessage('Query deleted successfully.')
+        } catch (error) {
+            setMessage(error instanceof Error ? error.message : 'Unable to delete query')
+        } finally {
+            setLoading(false)
+        }
+    }
+
     if (!user) {
         return (
             <div className='flex min-h-[75vh] items-center justify-center px-4 py-12 bg-background'>
@@ -289,19 +351,28 @@ const AdminPage = () => {
     return (
         <AdminShell activeTab={activeTab} setActiveTab={setActiveTab} user={user} onLogout={handleLogout}>
             <div className='space-y-6'>
-                <div className='max-w-3xl'>
-                    {activeTab === 'events' ? (
-                        <AdminEventForm selectedEvent={selectedEvent} loading={loading} onSubmit={handleSaveEvent} onCancel={() => setSelectedEvent(null)} />
-                    ) : (
-                        <AdminNewsForm selectedNews={selectedNews} loading={loading} onSubmit={handleSaveNews} onCancel={() => setSelectedNews(null)} />
-                    )}
-                </div>
+                {activeTab !== 'contacts' ? (
+                    <div className='max-w-3xl'>
+                        {activeTab === 'events' ? (
+                            <AdminEventForm selectedEvent={selectedEvent} loading={loading} onSubmit={handleSaveEvent} onCancel={() => setSelectedEvent(null)} />
+                        ) : (
+                            <AdminNewsForm selectedNews={selectedNews} loading={loading} onSubmit={handleSaveNews} onCancel={() => setSelectedNews(null)} />
+                        )}
+                    </div>
+                ) : null}
 
                 {message ? (
                     <div className='rounded-3xl border border-border bg-muted p-4 text-sm text-foreground'>{message}</div>
                 ) : null}
 
-                {activeTab === 'events' ? (
+                {activeTab === 'contacts' ? (
+                    <AdminContactsList
+                        contacts={contacts}
+                        loading={loading}
+                        onToggleStatus={handleToggleContactStatus}
+                        onDelete={handleDeleteContact}
+                    />
+                ) : activeTab === 'events' ? (
                     <AdminEventList events={events} loading={loading} onEdit={handleEditEvent} onDelete={handleDeleteEvent} />
                 ) : (
                     <AdminNewsList news={news} loading={loading} onEdit={handleEditNews} onDelete={handleDeleteNews} />

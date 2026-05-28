@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 
 import { Button } from '@/components/ui/button'
 
-type Tab = 'events' | 'news'
+type Tab = 'events' | 'news' | 'contacts'
 
 type AdminShellProps = {
     children: ReactNode
@@ -28,6 +28,7 @@ const AdminShell = ({ children, activeTab, setActiveTab, user, onLogout }: Admin
                         <div className='flex flex-wrap gap-2'>
                             <Button variant={activeTab === 'events' ? 'secondary' : 'ghost'} onClick={() => setActiveTab('events')}>Events</Button>
                             <Button variant={activeTab === 'news' ? 'secondary' : 'ghost'} onClick={() => setActiveTab('news')}>News</Button>
+                            <Button variant={activeTab === 'contacts' ? 'secondary' : 'ghost'} onClick={() => setActiveTab('contacts')}>Queries</Button>
                         </div>
                     </div>
                 </div>
@@ -39,6 +40,7 @@ const AdminShell = ({ children, activeTab, setActiveTab, user, onLogout }: Admin
                             <div className='mt-4 flex flex-col gap-2'>
                                 <Button variant={activeTab === 'events' ? 'outline' : 'ghost'} className='justify-start' onClick={() => setActiveTab('events')}>Events</Button>
                                 <Button variant={activeTab === 'news' ? 'outline' : 'ghost'} className='justify-start' onClick={() => setActiveTab('news')}>News</Button>
+                                <Button variant={activeTab === 'contacts' ? 'outline' : 'ghost'} className='justify-start' onClick={() => setActiveTab('contacts')}>Queries</Button>
                             </div>
                         </div>
 
