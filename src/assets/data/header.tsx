@@ -16,5 +16,9 @@ export const navigationData: NavigationSection[] = [
   {
     title: 'Contact Us',
     href: '/contactus'
+  },
+  {
+    title: 'Admin Panel',
+    href: '/admin'
   }
 ]

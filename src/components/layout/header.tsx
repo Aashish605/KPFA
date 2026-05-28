@@ -7,7 +7,6 @@ import Link from 'next/link'
 import { MenuIcon } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip'
 
 import MenuDropdown from '@/components/blocks/menu-dropdown'
 import MenuNavigation from '@/components/blocks/menu-navigation'
@@ -17,11 +16,6 @@ import { ModeToggle } from '@/components/layout/mode-toggle'
 import { cn } from '@/lib/utils'
 
 
-import { supabase } from '@/config/supabase'
-
-// Active section hook based on which section is closest to the top of the
-// viewport (accounts for header offset). This is more deterministic than
-// an IntersectionObserver for this layout and avoids lingering active states.
 const useActiveSection = (sectionIds: string[]) => {
   const [activeSection, setActiveSection] = useState<string>('')
 
@@ -102,19 +96,6 @@ const Header = ({ navigationData, className }: HeaderProps) => {
     }
   }, [])
 
-
-  useEffect(() => {
-    const signup = async () => {
-      const { data, error } = await supabase.auth.signUp({
-        email: 'admin@gmail.com',
-        password: '123456',
-      });
-
-      console.log('signup data:', data, error);
-    }
-
-    signup();
-  }, [])
 
   return (
     <header
