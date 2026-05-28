@@ -2,6 +2,7 @@
 
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import type { EventRecord } from '@/lib/admin-events'
 
 type AdminEventListProps = {
@@ -37,10 +38,15 @@ const AdminEventList = ({ events, loading, onEdit, onDelete }: AdminEventListPro
                                     <div className='grid gap-4'>
                                         <div className='space-y-2'>
                                             <div className='flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'>
-                                                <div>
-                                                    <p className='text-lg font-semibold text-foreground'>{event.title}</p>
-                                                    <p className='text-sm text-muted-foreground'>{event.location}</p>
-                                                </div>
+                                                 <div>
+                                                     <div className="flex flex-wrap items-center gap-2">
+                                                         <p className='text-lg font-semibold text-foreground'>{event.title}</p>
+                                                         <Badge variant={event.status === 'ongoing' ? 'default' : event.status === 'completed' ? 'secondary' : 'outline'} className='text-xs font-semibold capitalize'>
+                                                             {event.status ?? 'upcoming'}
+                                                         </Badge>
+                                                     </div>
+                                                     <p className='text-sm text-muted-foreground'>{event.location}</p>
+                                                 </div>
                                                 <p className='text-sm text-muted-foreground'>
                                                     {new Date(event.start_date).toLocaleString()} → {new Date(event.end_date).toLocaleString()}
                                                 </p>

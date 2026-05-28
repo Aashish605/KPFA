@@ -19,12 +19,15 @@ export interface EventItem {
   eventLink: string
 }
 
+import type { ReactNode } from 'react'
+
 type EventProps = {
   newItems: EventItem[]
   bg?: string
+  children?: ReactNode
 }
 
-const NewItems = ({ newItems, bg }: EventProps) => {
+const NewItems = ({ newItems, bg, children }: EventProps) => {
   const sectionClass = bg
     ? `py-8 sm:py-16 lg:py-24 ${bg}   `
     : `py-8 sm:py-16 lg:py-24`
@@ -43,6 +46,8 @@ const NewItems = ({ newItems, bg }: EventProps) => {
             across Karnali Province.
           </p>
         </div>
+
+        {children}
 
         {/* Grid Layout matching image_82b043.jpg structure */}
         <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>

@@ -23,22 +23,38 @@ const attachImageUrls = (events: EventRecord[]): EventRecord[] =>
         image_url: event.image_path ? getEventImageUrl(event.image_path) : null
     }))
 
-/**
- * Fetch the latest N events (sorted by start_date descending).
- */
 export const fetchLatestEvents = async (limit: number): Promise<EventRecord[]> => {
     const { data, error } = await supabase
         .from('events')
         .select('*')
-        .order('start_date', { ascending: false })
-        .limit(limit)
 
     if (error || !data) {
         console.error('Failed to fetch latest events:', error?.message)
         return []
     }
 
-    return attachImageUrls(data)
+    const events = attachImageUrls(data)
+
+    // Sort: ongoing first, then upcoming (closest first), then completed (newest first)
+    events.sort((a, b) => {
+        const statusOrder = { ongoing: 0, upcoming: 1, completed: 2 }
+        const aOrder = statusOrder[a.status] ?? 1
+        const bOrder = statusOrder[b.status] ?? 1
+
+        if (aOrder !== bOrder) {
+            return aOrder - bOrder
+        }
+
+        const aTime = new Date(a.start_date).getTime()
+        const bTime = new Date(b.start_date).getTime()
+
+        if (a.status === 'upcoming') {
+            return aTime - bTime // closest first
+        }
+        return bTime - aTime // newest/most recent first
+    })
+
+    return events.slice(0, limit)
 }
 
 /**

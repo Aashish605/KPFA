@@ -20,6 +20,7 @@ const AdminEventForm = ({ selectedEvent, loading, onSubmit, onCancel }: AdminEve
     const [location, setLocation] = useState('')
     const [startDate, setStartDate] = useState('')
     const [endDate, setEndDate] = useState('')
+    const [status, setStatus] = useState<'ongoing' | 'upcoming' | 'completed'>('upcoming')
     const [imageFile, setImageFile] = useState<File | null>(null)
     const [previewUrl, setPreviewUrl] = useState<string | null>(null)
 
@@ -30,6 +31,7 @@ const AdminEventForm = ({ selectedEvent, loading, onSubmit, onCancel }: AdminEve
             setLocation(selectedEvent.location)
             setStartDate(selectedEvent.start_date)
             setEndDate(selectedEvent.end_date)
+            setStatus(selectedEvent.status ?? 'upcoming')
             setPreviewUrl(selectedEvent.image_url ?? null)
             setImageFile(null)
             return
@@ -40,6 +42,7 @@ const AdminEventForm = ({ selectedEvent, loading, onSubmit, onCancel }: AdminEve
         setLocation('')
         setStartDate('')
         setEndDate('')
+        setStatus('upcoming')
         setImageFile(null)
         setPreviewUrl(null)
     }, [selectedEvent])
@@ -71,7 +74,8 @@ const AdminEventForm = ({ selectedEvent, loading, onSubmit, onCancel }: AdminEve
                 description: description.trim(),
                 location: location.trim(),
                 start_date: startDate,
-                end_date: endDate
+                end_date: endDate,
+                status: status
             },
             imageFile
         )
@@ -142,6 +146,20 @@ const AdminEventForm = ({ selectedEvent, loading, onSubmit, onCancel }: AdminEve
                                 required
                             />
                         </div>
+                    </div>
+                    <div>
+                        <label htmlFor='event-status' className='mb-2 block text-sm font-medium text-foreground'>Status</label>
+                        <select
+                            id='event-status'
+                            value={status}
+                            onChange={event => setStatus(event.currentTarget.value as 'ongoing' | 'upcoming' | 'completed')}
+                            className='w-full rounded-md border border-input bg-transparent px-3 py-2 text-base shadow-xs outline-none transition focus-visible:border-ring focus-visible:ring-ring/50'
+                            required
+                        >
+                            <option value='upcoming' className="bg-background text-foreground">Upcoming</option>
+                            <option value='ongoing' className="bg-background text-foreground">Ongoing</option>
+                            <option value='completed' className="bg-background text-foreground">Completed</option>
+                        </select>
                     </div>
                     <div>
                         <label htmlFor='event-image' className='mb-2 block text-sm font-medium text-foreground'>Event image</label>

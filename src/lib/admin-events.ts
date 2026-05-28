@@ -7,6 +7,7 @@ export type EventRecord = {
     location: string
     start_date: string
     end_date: string
+    status: 'ongoing' | 'upcoming' | 'completed'
     created_by: string
     image_path?: string | null
     image_url?: string | null
@@ -20,6 +21,7 @@ export type EventValues = {
     location: string
     start_date: string
     end_date: string
+    status: 'ongoing' | 'upcoming' | 'completed'
     image_path?: string
 }
 

@@ -172,6 +172,7 @@ const AdminPage = () => {
                 location: values.location,
                 start_date: values.start_date,
                 end_date: values.end_date,
+                status: values.status,
                 ...(image_path ? { image_path } : {})
             }
 
