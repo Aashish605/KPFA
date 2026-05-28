@@ -74,21 +74,46 @@ export const fetchAllEvents = async (): Promise<EventRecord[]> => {
     return attachImageUrls(data)
 }
 
+const isUuid = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str)
+
+const slugify = (text: string) =>
+    text
+        .toString()
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/&/g, '-and-')
+        .replace(/[^\w\-]+/g, '')
+        .replace(/\-\-+/g, '-')
+
 /**
- * Fetch a single event by its UUID id.
+ * Fetch a single event by its UUID id or slugified title fallback.
  */
 export const fetchEventById = async (id: string): Promise<EventRecord | null> => {
-    const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .eq('id', id)
-        .single()
+    if (isUuid(id)) {
+        const { data, error } = await supabase
+            .from('events')
+            .select('*')
+            .eq('id', id)
+            .single()
 
-    if (error || !data) {
-        return null
+        if (error) {
+            console.error(`fetchEventById error for id ${id}:`, error.message, error.details, error.hint)
+        }
+
+        if (!error && data) {
+            const [withImage] = attachImageUrls([data])
+            return withImage
+        }
+    } else {
+        console.warn(`fetchEventById: ${id} is not a valid UUID, trying fallback slug search.`)
     }
 
-    const [withImage] = attachImageUrls([data])
-
-    return withImage
+    // Fallback: fetch all and find by slugified title match
+    const allEvents = await fetchAllEvents()
+    const matched = allEvents.find(item => slugify(item.title) === id)
+    if (!matched) {
+        console.warn(`fetchEventById fallback: no event matched slug "${id}"`)
+    }
+    return matched ?? null
 }

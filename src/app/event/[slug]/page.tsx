@@ -12,7 +12,9 @@ export const dynamic = 'force-dynamic'
 const EventDetailPage = async ({ params }: { params: Promise<{ slug: string | string[] }> }) => {
     const resolvedParams = await params
     const id = Array.isArray(resolvedParams.slug) ? resolvedParams.slug[0] : resolvedParams.slug
+    console.log(`[EventDetailPage] Resolved slug param:`, id)
     const event = await fetchEventById(id)
+    console.log(`[EventDetailPage] Fetched event result for id ${id}:`, event ? `Found: ${event.title}` : 'NOT FOUND (null)')
 
     if (!event) {
         notFound()

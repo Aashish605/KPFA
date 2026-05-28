@@ -65,28 +65,43 @@ const TestimonialsComponent = ({ testimonials }: TestimonialsComponentProps) => 
           <CarouselContent className='sm:-ml-6'>
             {testimonials.map((article, index) => (
               <CarouselItem key={index} className='sm:pl-6 lg:basis-1/2'>
-                <Card className='hover:border-primary flex h-full flex-col justify-between rounded-3xl transition-colors duration-300'>
-                  <CardContent className='space-y-4 pt-6'>
-                    <div className='text-muted-foreground flex items-center justify-between gap-3 text-xs'>
-                      <Badge variant='secondary' className='rounded-xl text-[12px] tracking-wider uppercase'>
-                        {article.category}
-                      </Badge>
-                      <span>{article.date}</span>
-                    </div>
+                {article.slug ? (
+                  <Link href={`/news/${article.slug}`} className='block h-full cursor-pointer'>
+                    <Card className='hover:border-primary hover:shadow-md flex h-full flex-col justify-between rounded-3xl transition-all duration-300'>
+                      <CardContent className='space-y-4 pt-6'>
+                        <div className='text-muted-foreground flex items-center justify-between gap-3 text-xs'>
+                          <Badge variant='secondary' className='rounded-xl text-[12px] tracking-wider uppercase'>
+                            {article.category}
+                          </Badge>
+                          <span>{article.date}</span>
+                        </div>
 
-                    <h4 className='line-clamp-2 text-xl font-semibold'>
-                      {article.slug ? (
-                        <Link href={`/news/${article.slug}`} className='hover:text-primary transition-colors'>
+                        <h4 className='line-clamp-2 text-xl font-semibold hover:text-primary transition-colors'>
                           {article.title}
-                        </Link>
-                      ) : (
-                        article.title
-                      )}
-                    </h4>
+                        </h4>
 
-                    <p className='text-muted-foreground line-clamp-3 text-sm'>{article.summary}</p>
-                  </CardContent>
-                </Card>
+                        <p className='text-muted-foreground line-clamp-3 text-sm'>{article.summary}</p>
+                      </CardContent>
+                    </Card>
+                  </Link>
+                ) : (
+                  <Card className='hover:border-primary flex h-full flex-col justify-between rounded-3xl transition-colors duration-300'>
+                    <CardContent className='space-y-4 pt-6'>
+                      <div className='text-muted-foreground flex items-center justify-between gap-3 text-xs'>
+                        <Badge variant='secondary' className='rounded-xl text-[12px] tracking-wider uppercase'>
+                          {article.category}
+                        </Badge>
+                        <span>{article.date}</span>
+                      </div>
+
+                      <h4 className='line-clamp-2 text-xl font-semibold'>
+                        {article.title}
+                      </h4>
+
+                      <p className='text-muted-foreground line-clamp-3 text-sm'>{article.summary}</p>
+                    </CardContent>
+                  </Card>
+                )}
               </CarouselItem>
             ))}
           </CarouselContent>

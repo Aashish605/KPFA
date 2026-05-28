@@ -58,21 +58,40 @@ export const fetchAllNews = async (): Promise<NewsRecord[]> => {
     return attachImageUrls(data)
 }
 
+const isUuid = (str: string) => /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str)
+
+const slugify = (text: string) =>
+    text
+        .toString()
+        .toLowerCase()
+        .trim()
+        .replace(/\s+/g, '-')
+        .replace(/&/g, '-and-')
+        .replace(/[^\w\-]+/g, '')
+        .replace(/\-\-+/g, '-')
+
 /**
- * Fetch a single news item by its UUID id.
+ * Fetch a single news item by its UUID id, integer id, or slugified title fallback.
  */
 export const fetchNewsById = async (id: string): Promise<NewsRecord | null> => {
+    // 1. Try direct ID query (handles both UUID and integer IDs)
     const { data, error } = await supabase
         .from('news')
         .select('*')
         .eq('id', id)
-        .single()
+        .maybeSingle()
 
-    if (error || !data) {
-        return null
+    if (!error && data) {
+        const [withImage] = attachImageUrls([data])
+        return withImage
     }
 
-    const [withImage] = attachImageUrls([data])
+    if (error) {
+        console.warn(`fetchNewsById direct query warning for id ${id}:`, error.message)
+    }
 
-    return withImage
+    // 2. Fallback: match by slugified title or stringified ID
+    const allNews = await fetchAllNews()
+    const matched = allNews.find(item => slugify(item.title) === id || String(item.id) === id)
+    return matched ?? null
 }

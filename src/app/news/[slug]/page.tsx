@@ -11,7 +11,9 @@ export const dynamic = 'force-dynamic'
 const NewsDetailPage = async ({ params }: { params: Promise<{ slug: string | string[] }> }) => {
     const resolvedParams = await params
     const id = Array.isArray(resolvedParams.slug) ? resolvedParams.slug[0] : resolvedParams.slug
+    console.log(`[NewsDetailPage] Resolved slug param:`, id)
     const article = await fetchNewsById(id)
+    console.log(`[NewsDetailPage] Fetched article result for id ${id}:`, article ? `Found: ${article.title}` : 'NOT FOUND (null)')
 
     if (!article) {
         notFound()
