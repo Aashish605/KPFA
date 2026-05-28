@@ -264,10 +264,10 @@ const AdminPage = () => {
         }
     }
 
-    return (
-        <AdminShell activeTab={activeTab} setActiveTab={setActiveTab} user={user} onLogout={handleLogout}>
-            <div className='space-y-6'>
-                <div className='grid gap-8 lg:grid-cols-[1.05fr_0.95fr]'>
+    if (!user) {
+        return (
+            <div className='flex min-h-[75vh] items-center justify-center px-4 py-12 bg-background'>
+                <div className='w-full max-w-md space-y-6'>
                     <AdminAuthCard
                         user={user}
                         email={email}
@@ -278,6 +278,18 @@ const AdminPage = () => {
                         onLogin={handleLogin}
                         onLogout={handleLogout}
                     />
+                    {message ? (
+                        <div className='rounded-3xl border border-border bg-muted p-4 text-sm text-foreground text-center'>{message}</div>
+                    ) : null}
+                </div>
+            </div>
+        )
+    }
+
+    return (
+        <AdminShell activeTab={activeTab} setActiveTab={setActiveTab} user={user} onLogout={handleLogout}>
+            <div className='space-y-6'>
+                <div className='max-w-3xl'>
                     {activeTab === 'events' ? (
                         <AdminEventForm selectedEvent={selectedEvent} loading={loading} onSubmit={handleSaveEvent} onCancel={() => setSelectedEvent(null)} />
                     ) : (

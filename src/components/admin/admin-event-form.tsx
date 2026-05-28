@@ -158,7 +158,7 @@ const AdminEventForm = ({ selectedEvent, loading, onSubmit, onCancel }: AdminEve
                             <img src={previewUrl} alt='Event preview' className='h-48 w-full rounded-3xl object-cover' />
                         </div>
                     ) : null}
-                    <div className='flex flex-col gap-3 sm:flex-row'>
+                    <div className={selectedEvent ? 'flex flex-col gap-3' : 'flex flex-col gap-3 sm:flex-row'}>
                         <Button type='submit' disabled={loading} className='w-full'>
                             {selectedEvent ? (loading ? 'Updating event...' : 'Update event') : loading ? 'Creating event...' : 'Create event'}
                         </Button>
