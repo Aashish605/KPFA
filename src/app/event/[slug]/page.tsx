@@ -1,25 +1,31 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
-import { ArrowLeft, MapPinIcon } from 'lucide-react'
+import { ArrowLeft } from 'lucide-react'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { upcomingEvents, type EventItem } from '@/assets/data/new-items'
+import { fetchEventById } from '@/lib/public-events'
 
-const getEvent = (slug: string) => upcomingEvents.find(event => event.slug === slug)
-
-export const dynamicParams = false
-export const generateStaticParams = () => upcomingEvents.map(event => ({ slug: event.slug }))
+export const dynamic = 'force-dynamic'
 
 const EventDetailPage = async ({ params }: { params: Promise<{ slug: string | string[] }> }) => {
     const resolvedParams = await params
-    const slug = Array.isArray(resolvedParams.slug) ? resolvedParams.slug[0] : resolvedParams.slug
-    const event = getEvent(slug)
+    const id = Array.isArray(resolvedParams.slug) ? resolvedParams.slug[0] : resolvedParams.slug
+    const event = await fetchEventById(id)
 
     if (!event) {
         notFound()
     }
+
+    const startDate = new Date(event.start_date)
+    const endDate = new Date(event.end_date)
+    const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+    const dateMonth = monthNames[startDate.getMonth()] ?? 'TBD'
+    const dateDay = String(startDate.getDate()).padStart(2, '0')
+    const formattedStart = startDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    const formattedEnd = endDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
+    const imageUrl = event.image_url ?? '/images/football.webp'
 
     return (
         <main className='bg-muted text-foreground'>
@@ -57,7 +63,7 @@ const EventDetailPage = async ({ params }: { params: Promise<{ slug: string | st
                         <div className='space-y-10'>
                             <Card className='overflow-hidden rounded-4xl border border-border bg-background shadow-sm'>
                                 <CardContent className=''>
-                                    <img src={event.img} alt={event.alt} className=' w-full object-cover rounded-3xl' />
+                                    <img src={imageUrl} alt={event.title} className=' w-full object-cover rounded-3xl' />
                                 </CardContent>
                             </Card>
 
@@ -69,21 +75,27 @@ const EventDetailPage = async ({ params }: { params: Promise<{ slug: string | st
                                     <div className='grid gap-4 sm:grid-cols-2'>
                                         <div className='rounded-3xl border border-border bg-background p-5'>
                                             <p className='text-sm font-medium uppercase tracking-[0.24em] text-muted-foreground'>Venue</p>
-                                            <div className='mt-2 text-base font-semibold'>{event.venue}</div>
+                                            <div className='mt-2 text-base font-semibold'>{event.location}</div>
                                         </div>
                                         <div className='rounded-3xl border border-border bg-background p-5'>
                                             <p className='text-sm font-medium uppercase tracking-[0.24em] text-muted-foreground'>Date</p>
                                             <div className='mt-2 flex items-end gap-2'>
                                                 <span className='inline-flex h-12 w-12 items-center justify-center rounded-3xl bg-primary/5 text-primary font-bold'>
-                                                    {event.date.day}
+                                                    {dateDay}
                                                 </span>
-                                                <span className='text-lg font-semibold uppercase'>{event.date.month}</span>
+                                                <span className='text-lg font-semibold uppercase'>{dateMonth}</span>
                                             </div>
                                         </div>
                                     </div>
-                                    <div className='rounded-3xl border border-border bg-background p-5'>
-                                        <p className='text-sm font-medium uppercase tracking-[0.24em] text-muted-foreground'>Status</p>
-                                        <p className='mt-2 text-base font-semibold'>{event.status}</p>
+                                    <div className='grid gap-4 sm:grid-cols-2'>
+                                        <div className='rounded-3xl border border-border bg-background p-5'>
+                                            <p className='text-sm font-medium uppercase tracking-[0.24em] text-muted-foreground'>Start Date</p>
+                                            <p className='mt-2 text-base font-semibold'>{formattedStart}</p>
+                                        </div>
+                                        <div className='rounded-3xl border border-border bg-background p-5'>
+                                            <p className='text-sm font-medium uppercase tracking-[0.24em] text-muted-foreground'>End Date</p>
+                                            <p className='mt-2 text-base font-semibold'>{formattedEnd}</p>
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -100,7 +112,7 @@ const EventDetailPage = async ({ params }: { params: Promise<{ slug: string | st
                                 <div className='space-y-4'>
                                     <div className='rounded-3xl border border-border bg-background p-4'>
                                         <p className='text-sm font-medium text-muted-foreground'>Venue</p>
-                                        <p className='mt-1 text-base font-semibold'>{event.venue}</p>
+                                        <p className='mt-1 text-base font-semibold'>{event.location}</p>
                                     </div>
                                     <div className='rounded-3xl border border-border bg-background p-4'>
                                         <p className='text-sm font-medium text-muted-foreground'>Register</p>

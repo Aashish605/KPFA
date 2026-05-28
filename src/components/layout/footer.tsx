@@ -4,17 +4,17 @@ import Link from 'next/link'
 
 import { Separator } from '@/components/ui/separator'
 
-import BistroLogo from '@/assets/svg/bistro-logo'
 import { footerData } from '@/assets/data/footer'
 
 const Footer = () => {
   return (
     <footer className='bg-background' style={{ clipPath: 'polygon(0 16px, 100% 0, 100% 100%, 0 100%)' }}>
       <div className='mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 max-md:flex-col sm:px-6 sm:py-6 md:gap-6 md:py-8'>
-        <Link href='/#home'>
+        <Link href='/'>
           <div className='flex items-center gap-3'>
-            <BistroLogo className='gap-3' />
-            <span className='text-primary text-[20px] font-semibold'>Bistro</span>
+            <img width={52} height={52} src='/images/logo.png' alt='Bistro' className='' />
+
+            <span className='text-primary text-[20px] font-semibold'>KPFA</span>
           </div>
         </Link>
 
@@ -50,7 +50,7 @@ const Footer = () => {
 
       <div className='mx-auto flex max-w-7xl justify-center px-4 py-8 sm:px-6'>
         <p className='text-muted-foreground text-center text-balance'>
-          {`©${new Date().getFullYear()}`} Bistro , Made with ❤️ by &nbsp;
+          {`©${new Date().getFullYear()}`} KPFA , Made with ❤️ by &nbsp;
           <a href='https://www.codexnepal.com/' target='_blank' rel='noopener noreferrer' className='hover:underline'>
             CodexNepal.
           </a>

@@ -3,22 +3,25 @@ import { notFound } from 'next/navigation'
 
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { newsArticles, type NewsItem } from '@/assets/data/testimonials'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { fetchNewsById } from '@/lib/public-news'
 
-const getNewsItem = (slug: string) => newsArticles.find(article => article.slug === slug)
-
-export const dynamicParams = false
-export const generateStaticParams = () => newsArticles.map(article => ({ slug: article.slug }))
+export const dynamic = 'force-dynamic'
 
 const NewsDetailPage = async ({ params }: { params: Promise<{ slug: string | string[] }> }) => {
     const resolvedParams = await params
-    const slug = Array.isArray(resolvedParams.slug) ? resolvedParams.slug[0] : resolvedParams.slug
-    const article = getNewsItem(slug)
+    const id = Array.isArray(resolvedParams.slug) ? resolvedParams.slug[0] : resolvedParams.slug
+    const article = await fetchNewsById(id)
 
     if (!article) {
         notFound()
     }
+
+    const dateStr = new Date(article.inserted_at).toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    })
 
     return (
         <main className='bg-muted text-foreground'>
@@ -31,8 +34,8 @@ const NewsDetailPage = async ({ params }: { params: Promise<{ slug: string | str
                             </Badge>
                             <h1 className='text-3xl font-semibold sm:text-4xl lg:text-5xl'>{article.title}</h1>
                             <div className='flex flex-wrap items-center gap-3 text-sm text-muted-foreground'>
-                                <span className='rounded-full border border-border bg-muted px-3 py-1 uppercase tracking-[0.28em]'>{article.category}</span>
-                                <span>{article.date}</span>
+                                <span className='rounded-full border border-border bg-muted px-3 py-1 uppercase tracking-[0.28em]'>News</span>
+                                <span>{dateStr}</span>
                             </div>
                         </div>
                         <Button variant='outline' asChild>
@@ -42,11 +45,22 @@ const NewsDetailPage = async ({ params }: { params: Promise<{ slug: string | str
 
                     <div className='grid gap-10 lg:grid-cols-[1.25fr_0.75fr]'>
                         <div className='space-y-8'>
+                            {article.image_url ? (
+                                <Card className='overflow-hidden rounded-[2rem] border border-border bg-background shadow-sm'>
+                                    <CardContent className='p-0'>
+                                        <img
+                                            src={article.image_url}
+                                            alt={article.title}
+                                            className='w-full object-cover rounded-[2rem]'
+                                        />
+                                    </CardContent>
+                                </Card>
+                            ) : null}
+
                             <Card className='rounded-[2rem] border border-border bg-background shadow-sm'>
                                 <CardContent className='space-y-6 p-8'>
-                                    <p className='text-base leading-8 text-muted-foreground'>{article.summary}</p>
                                     <div className='space-y-4 text-base leading-8 text-foreground'>
-                                        {article.content?.split('\n\n').map((paragraph, index) => (
+                                        {article.content.split('\n\n').map((paragraph, index) => (
                                             <p key={index}>{paragraph}</p>
                                         ))}
                                     </div>
@@ -62,17 +76,17 @@ const NewsDetailPage = async ({ params }: { params: Promise<{ slug: string | str
                                 <CardContent className='space-y-4 px-6 pb-6'>
                                     <div className='rounded-3xl border border-border bg-background p-5'>
                                         <p className='text-sm font-medium uppercase tracking-[0.24em] text-muted-foreground'>Category</p>
-                                        <p className='mt-2 text-base font-semibold'>{article.category}</p>
+                                        <p className='mt-2 text-base font-semibold'>News</p>
                                     </div>
                                     <div className='rounded-3xl border border-border bg-background p-5'>
                                         <p className='text-sm font-medium uppercase tracking-[0.24em] text-muted-foreground'>Date</p>
-                                        <p className='mt-2 text-base font-semibold'>{article.date}</p>
+                                        <p className='mt-2 text-base font-semibold'>{dateStr}</p>
                                     </div>
                                     <div className='rounded-3xl border border-border bg-background p-5'>
                                         <p className='text-sm font-medium uppercase tracking-[0.24em] text-muted-foreground'>Share</p>
                                         <div className='mt-3 flex flex-wrap gap-3'>
                                             <Button asChild size='sm' variant='outline'>
-                                                <Link href={`/news/${article.slug}`} className='text-sm'>Copy link</Link>
+                                                <Link href={`/news/${article.id}`} className='text-sm'>Copy link</Link>
                                             </Button>
                                         </div>
                                     </div>
